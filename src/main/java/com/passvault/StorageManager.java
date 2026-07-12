@@ -34,15 +34,28 @@ public class StorageManager {
         }
     }
 
-    public void saveMasterPassword(String salt, String hashedPassword) throws Exception {
-        Map<String, String> config = new HashMap<>();
+    public void saveMasterPassword(String salt, String hashedPassword, String securityQuestion, String securitySalt, String iv, String recoveryData) throws Exception {
+        Map<String, String> config = loadMasterPasswordConfig();
+        if (config == null) {
+            config = new java.util.HashMap<>();
+            config.put("createdAt", String.valueOf(System.currentTimeMillis()));
+        }
         config.put("salt", salt);
         config.put("masterPassword", hashedPassword);
-        config.put("createdAt", String.valueOf(System.currentTimeMillis()));
         config.put("lastUsedAt", String.valueOf(System.currentTimeMillis()));
+        if (securityQuestion != null) {
+            config.put("securityQuestion", securityQuestion);
+            config.put("securitySalt", securitySalt);
+            config.put("iv", iv);
+            config.put("recoveryData", recoveryData);
+        }
 
         String json = gson.toJson(config);
         Files.write(Paths.get(CONFIG_FILE), json.getBytes());
+    }
+
+    public void saveMasterPassword(String salt, String hashedPassword) throws Exception {
+        saveMasterPassword(salt, hashedPassword, null, null, null, null);
     }
 
     public Map<String, String> loadMasterPasswordConfig() throws Exception {

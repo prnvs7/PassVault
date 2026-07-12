@@ -6,15 +6,21 @@ public class PasswordEntry {
     private String username;
     private String password;
     private String url;
+    private String notes = "";
     private long createdAt;
     private long lastModifiedAt;
 
     public PasswordEntry(String name, String username, String password, String url) {
+        this(name, username, password, url, "");
+    }
+
+    public PasswordEntry(String name, String username, String password, String url, String notes) {
         this.id = java.util.UUID.randomUUID().toString();
         this.name = name;
         this.username = username;
         this.password = password;
         this.url = url;
+        this.notes = notes != null ? notes : "";
         this.createdAt = System.currentTimeMillis();
         this.lastModifiedAt = System.currentTimeMillis();
     }
@@ -57,6 +63,15 @@ public class PasswordEntry {
 
     public void setUrl(String url) {
         this.url = url;
+        this.lastModifiedAt = System.currentTimeMillis();
+    }
+
+    public String getNotes() {
+        return notes != null ? notes : "";
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes != null ? notes : "";
         this.lastModifiedAt = System.currentTimeMillis();
     }
 
