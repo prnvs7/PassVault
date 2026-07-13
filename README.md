@@ -127,7 +127,7 @@ mvn package
 3. Encryption keys are derived only when needed and cleared from memory
 4. The application is fully offline - no network calls
 5. Data persists only on your local machine
-6. If you forget your master password, all data cannot be recovered
+6. If you forget your master password, there is a provision with one security question.
 
 ## Keyboard Shortcuts
 
@@ -190,5 +190,5 @@ For issues or feature requests, visit: https://github.com/yourusername/PassVault
 ---
 
 **Version**: 1.0  
-**Last Updated**: 2024  
+**Last Updated**: 2026  
 **Status**: Production Ready
