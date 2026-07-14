@@ -148,9 +148,7 @@ mvn package
 - Ensure Java 21: `java -version`
 - Try: `java -jar PassVault.jar`
 
-**"Forgot master password"**
-- Delete `~/.passvault/config.json` to reset
-- WARNING: This destroys your vault!
+
 
 ## File Structure
 
@@ -178,17 +176,3 @@ PassVault/
 - **Gson** (2.10.1) - JSON serialization
 - **Java Swing** - UI framework (built-in)
 - **Java Cryptography** - AES, PBKDF2 (built-in)
-
-## License
-
-Free software for personal use. © 2024
-
-## Support
-
-For issues or feature requests, visit: https://github.com/yourusername/PassVault
-
----
-
-**Version**: 1.0  
-**Last Updated**: 2026  
-**Status**: Production Ready
