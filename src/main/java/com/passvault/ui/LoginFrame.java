@@ -26,6 +26,9 @@ public class LoginFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         
+        // Set application icon images
+        setIconImages(IconUtils.getLogoImages());
+        
         // Adjust size dynamically to fit recovery fields
         if (isFirstTime) {
             setSize(460, 600);
@@ -35,12 +38,12 @@ public class LoginFrame extends JFrame {
         
         setLocationRelativeTo(null);
 
-        // Background Panel using Flat Light background
+        // Background Panel using Flat Light/Dark background
         JPanel backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
-                g2.setColor(new Color(0xF8, 0xF9, 0xFB));
+                g2.setColor(ThemeManager.getBgColor());
                 g2.fillRect(0, 0, getWidth(), getHeight());
                 g2.dispose();
             }
@@ -50,8 +53,8 @@ public class LoginFrame extends JFrame {
         setContentPane(backgroundPanel);
 
         // White Card container panel
-        RoundedPanel cardPanel = new RoundedPanel(16, new Color(0xE5, 0xE7, 0xEB));
-        cardPanel.setBackground(Color.WHITE);
+        RoundedPanel cardPanel = new RoundedPanel(16, ThemeManager.getBorderColor());
+        cardPanel.setBackground(ThemeManager.getCardColor());
         cardPanel.setLayout(new GridBagLayout());
         cardPanel.setBorder(BorderFactory.createEmptyBorder(20, 24, 20, 24));
         backgroundPanel.add(cardPanel, BorderLayout.CENTER);
@@ -64,7 +67,7 @@ public class LoginFrame extends JFrame {
 
         // Icon / Logo Symbol
         JLabel logoLabel = new JLabel();
-        logoLabel.setIcon(IconUtils.getIcon("shield", 48, new Color(0x25, 0x63, 0xEB)));
+        logoLabel.setIcon(IconUtils.getIcon("logo", 48, ThemeManager.getBlueAccent()));
         logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 0;
         cardPanel.add(logoLabel, gbc);
@@ -72,7 +75,7 @@ public class LoginFrame extends JFrame {
         // Title Label
         titleLabel = new JLabel(isFirstTime ? "Setup Master Password" : "Unlock Your Vault");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setForeground(new Color(0x11, 0x18, 0x27));
+        titleLabel.setForeground(ThemeManager.getTextPrimary());
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 1;
         cardPanel.add(titleLabel, gbc);
@@ -82,7 +85,7 @@ public class LoginFrame extends JFrame {
                 isFirstTime ? "Create a strong master password for your vault" : "Enter your master password to decrypt credentials"
         );
         instructionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        instructionLabel.setForeground(new Color(0x6B, 0x72, 0x80));
+        instructionLabel.setForeground(ThemeManager.getTextSecondary());
         instructionLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = 2;
         cardPanel.add(instructionLabel, gbc);
@@ -91,7 +94,7 @@ public class LoginFrame extends JFrame {
         if (isFirstTime) {
             JLabel passLabel = new JLabel("Master Password:");
             passLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            passLabel.setForeground(new Color(0x37, 0x41, 0x51));
+            passLabel.setForeground(ThemeManager.getTextPrimary());
             gbc.gridy = 3;
             cardPanel.add(passLabel, gbc);
         }
@@ -106,7 +109,7 @@ public class LoginFrame extends JFrame {
         // Show password checkbox
         JCheckBox showPasswordCb = new JCheckBox("Show Password");
         showPasswordCb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        showPasswordCb.setForeground(new Color(0x6B, 0x72, 0x80));
+        showPasswordCb.setForeground(ThemeManager.getTextSecondary());
         showPasswordCb.setOpaque(false);
         showPasswordCb.setCursor(new Cursor(Cursor.HAND_CURSOR));
         char defaultEchoChar = passwordField.getEchoChar();
@@ -129,7 +132,7 @@ public class LoginFrame extends JFrame {
         if (isFirstTime) {
             JLabel qLabel = new JLabel("Security Question:");
             qLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            qLabel.setForeground(new Color(0x37, 0x41, 0x51));
+            qLabel.setForeground(ThemeManager.getTextPrimary());
             gbc.gridy = 6;
             cardPanel.add(qLabel, gbc);
 
@@ -148,7 +151,7 @@ public class LoginFrame extends JFrame {
 
             JLabel aLabel = new JLabel("Security Answer (Case Insensitive):");
             aLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            aLabel.setForeground(new Color(0x37, 0x41, 0x51));
+            aLabel.setForeground(ThemeManager.getTextPrimary());
             gbc.gridy = 8;
             cardPanel.add(aLabel, gbc);
 
@@ -162,7 +165,7 @@ public class LoginFrame extends JFrame {
         if (isFirstTime) {
             JLabel strengthLabel = new JLabel("Strength: None");
             strengthLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            strengthLabel.setForeground(new Color(0x6B, 0x72, 0x80));
+            strengthLabel.setForeground(ThemeManager.getTextSecondary());
             strengthLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
             gbc.gridy = 10;
@@ -182,7 +185,7 @@ public class LoginFrame extends JFrame {
         // Status Label
         statusLabel = new JLabel("");
         statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        statusLabel.setForeground(new Color(0xDC, 0x26, 0x26)); // Red Accent
+        statusLabel.setForeground(ThemeManager.getDestructiveRed()); // Red Accent
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridy = isFirstTime ? 11 : 5;
         cardPanel.add(statusLabel, gbc);
@@ -193,7 +196,7 @@ public class LoginFrame extends JFrame {
         loginButton.setIconTextGap(8);
         loginButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
         loginButton.setPreferredSize(new Dimension(280, 40));
-        loginButton.setBackground(new Color(0x25, 0x63, 0xEB)); // Blue Accent
+        loginButton.setBackground(ThemeManager.getBlueAccent()); // Blue Accent
         loginButton.setForeground(Color.WHITE);
         loginButton.addActionListener(e -> performAction());
 
@@ -205,7 +208,7 @@ public class LoginFrame extends JFrame {
         if (!isFirstTime) {
             JButton resetBtn = new JButton("Forgot Master Password? Recover Vault");
             resetBtn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            resetBtn.setForeground(new Color(0x25, 0x63, 0xEB));
+            resetBtn.setForeground(ThemeManager.getBlueAccent());
             resetBtn.setContentAreaFilled(false);
             resetBtn.setBorderPainted(false);
             resetBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -275,19 +278,34 @@ public class LoginFrame extends JFrame {
     }
 
     private void updateStrengthColor(JLabel label, String strength) {
-        switch (strength) {
-            case "Weak":
-                label.setForeground(new Color(0xDC, 0x26, 0x26));
-                break;
-            case "Medium":
-                label.setForeground(new Color(0xD9, 0x77, 0x06));
-                break;
-            case "Strong":
-                label.setForeground(new Color(0x16, 0xA3, 0x4A));
-                break;
-            case "Very Strong":
-                label.setForeground(new Color(0x15, 0x80, 0x3D));
-                break;
+        if (ThemeManager.isDark()) {
+            switch (strength) {
+                case "Weak":
+                    label.setForeground(new Color(0xEF, 0x44, 0x44)); // Destructive Red
+                    break;
+                case "Medium":
+                    label.setForeground(new Color(0xFB, 0xBF, 0x24)); // Warning Amber
+                    break;
+                case "Strong":
+                case "Very Strong":
+                    label.setForeground(new Color(0x34, 0xD3, 0x99)); // Modern light green
+                    break;
+            }
+        } else {
+            switch (strength) {
+                case "Weak":
+                    label.setForeground(new Color(0xDC, 0x26, 0x26));
+                    break;
+                case "Medium":
+                    label.setForeground(new Color(0xD9, 0x77, 0x06));
+                    break;
+                case "Strong":
+                    label.setForeground(new Color(0x16, 0xA3, 0x4A));
+                    break;
+                case "Very Strong":
+                    label.setForeground(new Color(0x15, 0x80, 0x3D));
+                    break;
+            }
         }
     }
 

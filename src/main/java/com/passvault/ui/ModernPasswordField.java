@@ -23,22 +23,33 @@ public class ModernPasswordField extends JPasswordField {
         setOpaque(false);
         setBorder(new EmptyBorder(8, 12, 8, 12));
         setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        setForeground(new Color(0x11, 0x18, 0x27));
-        setCaretColor(new Color(0x11, 0x18, 0x27));
+        updateColors();
 
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                borderColor = new Color(0x25, 0x63, 0xEB);
+                borderColor = ThemeManager.getBlueAccent();
                 repaint();
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                borderColor = new Color(0xE5, 0xE7, 0xEB);
+                borderColor = ThemeManager.getBorderColor();
                 repaint();
             }
         });
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        updateColors();
+    }
+
+    private void updateColors() {
+        setForeground(ThemeManager.getTextPrimary());
+        setCaretColor(ThemeManager.getTextPrimary());
+        borderColor = ThemeManager.getBorderColor();
     }
 
     @Override
@@ -46,7 +57,7 @@ public class ModernPasswordField extends JPasswordField {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2.setColor(Color.WHITE);
+        g2.setColor(ThemeManager.getCardColor());
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
 
         g2.setColor(borderColor);

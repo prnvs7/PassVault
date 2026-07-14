@@ -36,14 +36,18 @@ public class AddEditDialog extends JDialog {
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
-                // Paint beautiful modern subtle background gradient
                 Graphics2D g2 = (Graphics2D) g.create();
-                GradientPaint gp = new GradientPaint(
-                    0, 0, new Color(248, 249, 251),
-                    getWidth(), getHeight(), new Color(241, 245, 249)
-                );
-                g2.setPaint(gp);
-                g2.fillRect(0, 0, getWidth(), getHeight());
+                if (ThemeManager.isDark()) {
+                    g2.setColor(ThemeManager.getBgColor());
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                } else {
+                    GradientPaint gp = new GradientPaint(
+                        0, 0, new Color(248, 249, 251),
+                        getWidth(), getHeight(), new Color(241, 245, 249)
+                    );
+                    g2.setPaint(gp);
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                }
                 g2.dispose();
             }
         };
@@ -69,7 +73,7 @@ public class AddEditDialog extends JDialog {
         gbcLabel.gridy = 0;
         JLabel nameLabel = new JLabel("Site/App Name:");
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        nameLabel.setForeground(new Color(0x37, 0x41, 0x51));
+        nameLabel.setForeground(ThemeManager.getTextPrimary());
         mainPanel.add(nameLabel, gbcLabel);
 
         nameField = new ModernTextField(20);
@@ -80,7 +84,7 @@ public class AddEditDialog extends JDialog {
         gbcLabel.gridy = 1;
         JLabel usernameLabel = new JLabel("Username/Email:");
         usernameLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        usernameLabel.setForeground(new Color(0x37, 0x41, 0x51));
+        usernameLabel.setForeground(ThemeManager.getTextPrimary());
         mainPanel.add(usernameLabel, gbcLabel);
 
         usernameField = new ModernTextField(20);
@@ -91,7 +95,7 @@ public class AddEditDialog extends JDialog {
         gbcLabel.gridy = 2;
         JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        passwordLabel.setForeground(new Color(0x37, 0x41, 0x51));
+        passwordLabel.setForeground(ThemeManager.getTextPrimary());
         mainPanel.add(passwordLabel, gbcLabel);
 
         JPanel passwordPanel = new JPanel(new BorderLayout(8, 0));
@@ -111,7 +115,7 @@ public class AddEditDialog extends JDialog {
 
         JCheckBox showPasswordCb = new JCheckBox("Show");
         showPasswordCb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        showPasswordCb.setForeground(new Color(0x6B, 0x72, 0x80));
+        showPasswordCb.setForeground(ThemeManager.getTextSecondary());
         showPasswordCb.setOpaque(false);
         showPasswordCb.setCursor(new Cursor(Cursor.HAND_CURSOR));
         char defaultEchoChar = passwordField.getEchoChar();
@@ -125,13 +129,12 @@ public class AddEditDialog extends JDialog {
         eastPanel.add(showPasswordCb);
 
         RoundedButton generateBtn = new RoundedButton("Generate", 8);
-        generateBtn.setIcon(IconUtils.getIcon("wand-sparkles", 16, new Color(0x37, 0x41, 0x51)));
+        generateBtn.setIcon(IconUtils.getIcon("wand-sparkles", 16, ThemeManager.getTextPrimary()));
         generateBtn.setIconTextGap(6);
         generateBtn.setFont(new Font("Segoe UI", Font.BOLD, 11));
         generateBtn.setPreferredSize(new Dimension(110, 32));
-        generateBtn.setBackground(new Color(0xF3, 0xF4, 0xF6));
-        generateBtn.setForeground(new Color(0x37, 0x41, 0x51));
-        generateBtn.setHoverColor(new Color(0xE5, 0xE7, 0xEB));
+        generateBtn.setBackground(ThemeManager.isDark() ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        generateBtn.setForeground(ThemeManager.getTextPrimary());
         generateBtn.addActionListener(e -> generatePassword());
         eastPanel.add(generateBtn);
 
@@ -144,12 +147,12 @@ public class AddEditDialog extends JDialog {
         gbcLabel.gridy = 3;
         JLabel strengthTitleLabel = new JLabel("Strength:");
         strengthTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        strengthTitleLabel.setForeground(new Color(0x37, 0x41, 0x51));
+        strengthTitleLabel.setForeground(ThemeManager.getTextPrimary());
         mainPanel.add(strengthTitleLabel, gbcLabel);
 
         strengthLabel = new JLabel("None");
         strengthLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        strengthLabel.setForeground(new Color(150, 150, 150));
+        strengthLabel.setForeground(ThemeManager.getTextSecondary());
         gbcField.gridy = 3;
         mainPanel.add(strengthLabel, gbcField);
 
@@ -157,7 +160,7 @@ public class AddEditDialog extends JDialog {
         gbcLabel.gridy = 4;
         JLabel urlLabel = new JLabel("Website URL:");
         urlLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        urlLabel.setForeground(new Color(0x37, 0x41, 0x51));
+        urlLabel.setForeground(ThemeManager.getTextPrimary());
         mainPanel.add(urlLabel, gbcLabel);
 
         urlField = new ModernTextField(20);
@@ -168,18 +171,21 @@ public class AddEditDialog extends JDialog {
         gbcLabel.gridy = 5;
         JLabel notesLabel = new JLabel("Notes:");
         notesLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        notesLabel.setForeground(new Color(0x37, 0x41, 0x51));
+        notesLabel.setForeground(ThemeManager.getTextPrimary());
         mainPanel.add(notesLabel, gbcLabel);
 
         notesArea = new JTextArea(4, 20);
         notesArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         notesArea.setLineWrap(true);
         notesArea.setWrapStyleWord(true);
-        notesArea.setForeground(new Color(0x11, 0x18, 0x27));
+        notesArea.setForeground(ThemeManager.getTextPrimary());
+        notesArea.setBackground(ThemeManager.getCardColor());
+        notesArea.setCaretColor(ThemeManager.getTextPrimary());
         notesArea.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
 
         JScrollPane notesScroll = new JScrollPane(notesArea);
-        notesScroll.setBorder(BorderFactory.createLineBorder(new Color(0xE5, 0xE7, 0xEB)));
+        notesScroll.setBorder(BorderFactory.createLineBorder(ThemeManager.getBorderColor()));
+        notesScroll.getViewport().setBackground(ThemeManager.getCardColor());
         
         gbcField.gridy = 5;
         gbcField.fill = GridBagConstraints.BOTH;
@@ -197,9 +203,8 @@ public class AddEditDialog extends JDialog {
         RoundedButton cancelBtn = new RoundedButton("Cancel", 10);
         cancelBtn.setPreferredSize(new Dimension(100, 36));
         cancelBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        cancelBtn.setBackground(new Color(0xF3, 0xF4, 0xF6));
-        cancelBtn.setForeground(new Color(0x37, 0x41, 0x51));
-        cancelBtn.setHoverColor(new Color(0xE5, 0xE7, 0xEB));
+        cancelBtn.setBackground(ThemeManager.isDark() ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        cancelBtn.setForeground(ThemeManager.getTextPrimary());
         cancelBtn.addActionListener(e -> dispose());
         buttonPanel.add(cancelBtn);
 
@@ -208,7 +213,7 @@ public class AddEditDialog extends JDialog {
         saveBtn.setIconTextGap(6);
         saveBtn.setPreferredSize(new Dimension(100, 36));
         saveBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        saveBtn.setBackground(new Color(0x25, 0x63, 0xEB)); // Blue Accent
+        saveBtn.setBackground(ThemeManager.getBlueAccent()); // Blue Accent
         saveBtn.setForeground(Color.WHITE);
         saveBtn.addActionListener(e -> saveEntry());
         buttonPanel.add(saveBtn);
@@ -268,22 +273,40 @@ public class AddEditDialog extends JDialog {
     }
 
     private void updateStrengthColor(JLabel label, String strength) {
-        switch (strength) {
-            case "Weak":
-                label.setForeground(new Color(0xDC, 0x26, 0x26));
-                break;
-            case "Medium":
-                label.setForeground(new Color(0xD9, 0x77, 0x06));
-                break;
-            case "Strong":
-                label.setForeground(new Color(0x16, 0xA3, 0x4A));
-                break;
-            case "Very Strong":
-                label.setForeground(new Color(0x15, 0x80, 0x3D));
-                break;
-            default:
-                label.setForeground(new Color(0x6B, 0x72, 0x80));
-                break;
+        if (ThemeManager.isDark()) {
+            switch (strength) {
+                case "Weak":
+                    label.setForeground(new Color(0xEF, 0x44, 0x44)); // Destructive Red
+                    break;
+                case "Medium":
+                    label.setForeground(new Color(0xFB, 0xBF, 0x24)); // Warning Amber
+                    break;
+                case "Strong":
+                case "Very Strong":
+                    label.setForeground(new Color(0x34, 0xD3, 0x99)); // Modern light green
+                    break;
+                default:
+                    label.setForeground(ThemeManager.getTextSecondary());
+                    break;
+            }
+        } else {
+            switch (strength) {
+                case "Weak":
+                    label.setForeground(new Color(0xDC, 0x26, 0x26));
+                    break;
+                case "Medium":
+                    label.setForeground(new Color(0xD9, 0x77, 0x06));
+                    break;
+                case "Strong":
+                    label.setForeground(new Color(0x16, 0xA3, 0x4A));
+                    break;
+                case "Very Strong":
+                    label.setForeground(new Color(0x15, 0x80, 0x3D));
+                    break;
+                default:
+                    label.setForeground(new Color(0x6B, 0x72, 0x80));
+                    break;
+            }
         }
     }
 

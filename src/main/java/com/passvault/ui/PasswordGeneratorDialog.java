@@ -33,12 +33,17 @@ public class PasswordGeneratorDialog extends JDialog {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
-                GradientPaint gp = new GradientPaint(
-                    0, 0, new Color(248, 249, 251),
-                    getWidth(), getHeight(), new Color(241, 245, 249)
-                );
-                g2.setPaint(gp);
-                g2.fillRect(0, 0, getWidth(), getHeight());
+                if (ThemeManager.isDark()) {
+                    g2.setColor(ThemeManager.getBgColor());
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                } else {
+                    GradientPaint gp = new GradientPaint(
+                        0, 0, new Color(248, 249, 251),
+                        getWidth(), getHeight(), new Color(241, 245, 249)
+                    );
+                    g2.setPaint(gp);
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                }
                 g2.dispose();
             }
         };
@@ -53,7 +58,7 @@ public class PasswordGeneratorDialog extends JDialog {
         // Title
         JLabel titleLabel = new JLabel("Generate Strong Password");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setForeground(new Color(0x11, 0x18, 0x27));
+        titleLabel.setForeground(ThemeManager.getTextPrimary());
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
@@ -65,10 +70,11 @@ public class PasswordGeneratorDialog extends JDialog {
         passwordDisplay.setEditable(false);
         passwordDisplay.setLineWrap(true);
         passwordDisplay.setWrapStyleWord(true);
-        passwordDisplay.setBackground(new Color(0xF3, 0xF4, 0xF6));
-        passwordDisplay.setForeground(new Color(0x11, 0x18, 0x27));
+        passwordDisplay.setBackground(ThemeManager.isDark() ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        passwordDisplay.setForeground(ThemeManager.getTextPrimary());
+        passwordDisplay.setCaretColor(ThemeManager.getTextPrimary());
         passwordDisplay.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(0xE5, 0xE7, 0xEB)),
+            BorderFactory.createLineBorder(ThemeManager.getBorderColor()),
             BorderFactory.createEmptyBorder(10, 14, 10, 14)
         ));
 
@@ -81,7 +87,7 @@ public class PasswordGeneratorDialog extends JDialog {
 
         JLabel lengthTextLabel = new JLabel("Length: 16");
         lengthTextLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lengthTextLabel.setForeground(new Color(0x37, 0x41, 0x51));
+        lengthTextLabel.setForeground(ThemeManager.getTextPrimary());
         sliderPanel.add(lengthTextLabel, BorderLayout.WEST);
 
         lengthSlider = new JSlider(8, 32, 16);
@@ -90,7 +96,7 @@ public class PasswordGeneratorDialog extends JDialog {
         lengthSlider.setPaintTicks(true);
         lengthSlider.setPaintLabels(true);
         lengthSlider.setFont(new Font("Segoe UI", Font.PLAIN, 10));
-        lengthSlider.setForeground(new Color(0x6B, 0x72, 0x80));
+        lengthSlider.setForeground(ThemeManager.getTextSecondary());
         sliderPanel.add(lengthSlider, BorderLayout.CENTER);
 
         gbc.gridy = 2;
@@ -140,24 +146,22 @@ public class PasswordGeneratorDialog extends JDialog {
         buttonPanel.setOpaque(false);
 
         RoundedButton regenerateBtn = new RoundedButton("Regenerate", 10);
-        regenerateBtn.setIcon(IconUtils.getIcon("wand-sparkles", 16, new Color(0x37, 0x41, 0x51)));
+        regenerateBtn.setIcon(IconUtils.getIcon("wand-sparkles", 16, ThemeManager.getTextPrimary()));
         regenerateBtn.setIconTextGap(6);
         regenerateBtn.setPreferredSize(new Dimension(130, 36));
         regenerateBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        regenerateBtn.setBackground(new Color(0xF3, 0xF4, 0xF6));
-        regenerateBtn.setForeground(new Color(0x37, 0x41, 0x51));
-        regenerateBtn.setHoverColor(new Color(0xE5, 0xE7, 0xEB));
+        regenerateBtn.setBackground(ThemeManager.isDark() ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        regenerateBtn.setForeground(ThemeManager.getTextPrimary());
         regenerateBtn.addActionListener(e -> generateNewPassword());
         buttonPanel.add(regenerateBtn);
 
         RoundedButton copyBtn = new RoundedButton("Copy", 10);
-        copyBtn.setIcon(IconUtils.getIcon("copy", 16, new Color(0x37, 0x41, 0x51)));
+        copyBtn.setIcon(IconUtils.getIcon("copy", 16, ThemeManager.getTextPrimary()));
         copyBtn.setIconTextGap(6);
         copyBtn.setPreferredSize(new Dimension(110, 36));
         copyBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        copyBtn.setBackground(new Color(0xF3, 0xF4, 0xF6));
-        copyBtn.setForeground(new Color(0x37, 0x41, 0x51));
-        copyBtn.setHoverColor(new Color(0xE5, 0xE7, 0xEB));
+        copyBtn.setBackground(ThemeManager.isDark() ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        copyBtn.setForeground(ThemeManager.getTextPrimary());
         copyBtn.addActionListener(e -> copyToClipboard());
         buttonPanel.add(copyBtn);
 
@@ -166,7 +170,7 @@ public class PasswordGeneratorDialog extends JDialog {
         useBtn.setIconTextGap(6);
         useBtn.setPreferredSize(new Dimension(120, 36));
         useBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        useBtn.setBackground(new Color(0x25, 0x63, 0xEB)); // Blue Accent
+        useBtn.setBackground(ThemeManager.getBlueAccent()); // Blue Accent
         useBtn.setForeground(Color.WHITE);
         useBtn.addActionListener(e -> usePassword());
         buttonPanel.add(useBtn);
@@ -181,7 +185,7 @@ public class PasswordGeneratorDialog extends JDialog {
     private JCheckBox createModernCheckbox(String text, boolean selected) {
         JCheckBox cb = new JCheckBox(text, selected);
         cb.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        cb.setForeground(new Color(0x37, 0x41, 0x51));
+        cb.setForeground(ThemeManager.getTextPrimary());
         cb.setOpaque(false);
         cb.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return cb;

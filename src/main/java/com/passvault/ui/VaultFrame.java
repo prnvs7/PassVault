@@ -26,10 +26,18 @@ public class VaultFrame extends JFrame {
     private JPanel mainContentPanel;
     
     // Header Components
+    private JPanel headerPanel;
+    private JLabel headerTitleLabel;
+    private JPanel badgePanel;
+    private RoundedButton lockButton;
     private JLabel entryCountBadge;
     private JLabel lastUsedLabel;
     
     // Sidebar Navigation
+    private JPanel sidebar;
+    private JLabel navTitle;
+    private JLabel actionsTitle;
+    private JLabel systemTitle;
     private JButton navVaultBtn;
     private JButton navGenBtn;
     private JButton navSettingsBtn;
@@ -37,6 +45,7 @@ public class VaultFrame extends JFrame {
     private JButton activeNavButton;
 
     // Vault View Components
+    private RoundedPanel roundedTableContainer;
     private ModernJTable passwordTable;
     private DefaultTableModel tableModel;
     private SearchTextField searchField;
@@ -60,7 +69,37 @@ public class VaultFrame extends JFrame {
     private JPanel detailsContent;
     private JButton btnEditDetail;
     private JButton btnDeleteDetail;
+    private JLabel placeholderKeyIcon;
+    private JLabel placeholderInfoText;
     
+    // Generator View Components
+    private RoundedPanel generatorCard;
+    private JLabel generatorTitle;
+    private JTextArea generatorPasswordDisplay;
+    private JLabel generatorLengthLabel;
+    private RoundedButton generatorRegenBtn;
+    private RoundedButton generatorCopyBtn;
+    
+    // Settings View Components
+    private RoundedPanel settingsCard;
+    private JLabel settingsTitle;
+    private JLabel settingsInfo;
+    private JLabel settingsRecoveryInfo;
+    private RoundedButton settingsConfigureRecoveryBtn;
+    private JLabel settingsWarningText;
+    private RoundedButton settingsResetBtn;
+    private JLabel settingsThemeTitle;
+    private JLabel settingsThemeInfo;
+    private RoundedButton settingsThemeBtn;
+
+    // About View Components
+    private RoundedPanel aboutCard;
+    private JLabel aboutLogo;
+    private JLabel aboutTitle;
+    private JLabel aboutVersion;
+    private JLabel aboutDesc;
+    private JLabel aboutCopyright;
+
     // Active entry reference in details panel
     private PasswordEntry selectedEntry;
 
@@ -75,6 +114,9 @@ public class VaultFrame extends JFrame {
         setSize(1200, 780);
         setMinimumSize(new Dimension(1000, 680));
         setLocationRelativeTo(null);
+        
+        // Set application icon images
+        setIconImages(IconUtils.getLogoImages());
         
         // Frame styling
         getContentPane().setBackground(new Color(0xF8, 0xF9, 0xFB));
@@ -97,6 +139,9 @@ public class VaultFrame extends JFrame {
         
         add(mainContentPanel, BorderLayout.CENTER);
 
+        // Apply theme styling dynamically
+        applyTheme();
+
         // Highlight vault by default
         selectNavButton(navVaultBtn, "VAULT");
 
@@ -104,10 +149,10 @@ public class VaultFrame extends JFrame {
     }
 
     private JPanel createHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(new Color(0x1F, 0x29, 0x37)); // Dark background
-        header.setPreferredSize(new Dimension(1200, 75));
-        header.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
+        headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(0x1F, 0x29, 0x37)); // Dark background
+        headerPanel.setPreferredSize(new Dimension(1200, 75));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
 
         // Left section: Title & metadata
         JPanel leftPanel = new JPanel(new GridBagLayout());
@@ -116,13 +161,13 @@ public class VaultFrame extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         
-        JLabel titleLabel = new JLabel("PassVault");
-        titleLabel.setIcon(IconUtils.getIcon("shield", 24, Color.WHITE));
-        titleLabel.setIconTextGap(10);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        titleLabel.setForeground(Color.WHITE);
+        headerTitleLabel = new JLabel("PassVault");
+        headerTitleLabel.setIcon(IconUtils.getIcon("logo", 24, Color.WHITE));
+        headerTitleLabel.setIconTextGap(10);
+        headerTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        headerTitleLabel.setForeground(Color.WHITE);
         gbc.gridy = 0;
-        leftPanel.add(titleLabel, gbc);
+        leftPanel.add(headerTitleLabel, gbc);
 
         lastUsedLabel = new JLabel("Loading vault metadata...");
         lastUsedLabel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
@@ -132,7 +177,7 @@ public class VaultFrame extends JFrame {
         leftPanel.add(lastUsedLabel, gbc);
         updateMasterPasswordInfo();
 
-        header.add(leftPanel, BorderLayout.WEST);
+        headerPanel.add(leftPanel, BorderLayout.WEST);
 
         // Right section: Counter badge and Lock button
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 8));
@@ -148,7 +193,7 @@ public class VaultFrame extends JFrame {
         entryCountBadge.setBackground(new Color(0x37, 0x41, 0x51));
         entryCountBadge.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
         
-        JPanel badgePanel = new RoundedPanel(12, null) {
+        badgePanel = new RoundedPanel(12, null) {
             {
                 setBackground(new Color(0x37, 0x41, 0x51));
                 setLayout(new BorderLayout());
@@ -157,7 +202,7 @@ public class VaultFrame extends JFrame {
         };
         rightPanel.add(badgePanel);
 
-        RoundedButton lockButton = new RoundedButton("Lock Vault", 12);
+        lockButton = new RoundedButton("Lock Vault", 12);
         lockButton.setIcon(IconUtils.getIcon("lock", 18, Color.WHITE));
         lockButton.setIconTextGap(8);
         lockButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -167,27 +212,31 @@ public class VaultFrame extends JFrame {
         lockButton.addActionListener(e -> lockVault());
         rightPanel.add(lockButton);
 
-        header.add(rightPanel, BorderLayout.EAST);
+        headerPanel.add(rightPanel, BorderLayout.EAST);
         updateEntryCount();
 
-        return header;
+        return headerPanel;
     }
 
     private JPanel createSidebar() {
-        JPanel sidebar = new JPanel();
+        sidebar = new JPanel();
         sidebar.setBackground(Color.WHITE);
         sidebar.setPreferredSize(new Dimension(220, 700));
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(0xE5, 0xE7, 0xEB)));
+        sidebar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(0xE5, 0xE7, 0xEB)),
+            BorderFactory.createEmptyBorder(0, 16, 0, 16)
+        ));
         sidebar.setOpaque(true);
 
         sidebar.add(Box.createVerticalStrut(16));
 
         // Group 1: Navigation
-        JLabel navTitle = new JLabel("NAVIGATION");
+        navTitle = new JLabel("NAVIGATION");
         navTitle.setFont(new Font("Segoe UI", Font.BOLD, 11));
         navTitle.setForeground(new Color(0x6B, 0x72, 0x80));
-        navTitle.setBorder(BorderFactory.createEmptyBorder(0, 24, 8, 24));
+        navTitle.setBorder(BorderFactory.createEmptyBorder(0, 8, 8, 8));
+        navTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         sidebar.add(navTitle);
 
         navVaultBtn = createSidebarNavButton("All Passwords", "VAULT", "vault");
@@ -199,10 +248,11 @@ public class VaultFrame extends JFrame {
         sidebar.add(Box.createVerticalStrut(20));
 
         // Group 2: Actions
-        JLabel actionsTitle = new JLabel("VAULT OPERATIONS");
+        actionsTitle = new JLabel("VAULT OPERATIONS");
         actionsTitle.setFont(new Font("Segoe UI", Font.BOLD, 11));
         actionsTitle.setForeground(new Color(0x6B, 0x72, 0x80));
-        actionsTitle.setBorder(BorderFactory.createEmptyBorder(0, 24, 8, 24));
+        actionsTitle.setBorder(BorderFactory.createEmptyBorder(0, 8, 8, 8));
+        actionsTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         sidebar.add(actionsTitle);
 
         Color grayColor = new Color(0x6B, 0x72, 0x80);
@@ -224,10 +274,11 @@ public class VaultFrame extends JFrame {
         sidebar.add(Box.createVerticalStrut(20));
 
         // Group 3: System
-        JLabel systemTitle = new JLabel("SYSTEM");
+        systemTitle = new JLabel("SYSTEM");
         systemTitle.setFont(new Font("Segoe UI", Font.BOLD, 11));
         systemTitle.setForeground(new Color(0x6B, 0x72, 0x80));
-        systemTitle.setBorder(BorderFactory.createEmptyBorder(0, 24, 8, 24));
+        systemTitle.setBorder(BorderFactory.createEmptyBorder(0, 8, 8, 8));
+        systemTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         sidebar.add(systemTitle);
 
         navSettingsBtn = createSidebarNavButton("Settings", "SETTINGS", "settings");
@@ -251,7 +302,7 @@ public class VaultFrame extends JFrame {
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setPreferredSize(new Dimension(188, 38));
         button.setMaximumSize(new Dimension(188, 38));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setBackground(Color.WHITE);
         button.setForeground(new Color(0x11, 0x18, 0x27));
         button.setHoverColor(new Color(0xF3, 0xF4, 0xF6));
@@ -268,7 +319,7 @@ public class VaultFrame extends JFrame {
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setPreferredSize(new Dimension(188, 38));
         button.setMaximumSize(new Dimension(188, 38));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setBackground(Color.WHITE);
         button.setForeground(new Color(0x11, 0x18, 0x27));
         button.setHoverColor(new Color(0xF3, 0xF4, 0xF6));
@@ -278,26 +329,8 @@ public class VaultFrame extends JFrame {
     }
 
     private void selectNavButton(JButton button, String cardName) {
-        if (activeNavButton != null) {
-            activeNavButton.setBackground(Color.WHITE);
-            activeNavButton.setForeground(new Color(0x11, 0x18, 0x27));
-            String name = (String) activeNavButton.getClientProperty("iconName");
-            if (name != null) {
-                activeNavButton.setIcon(IconUtils.getIcon(name, 20, new Color(0x11, 0x18, 0x27)));
-            }
-            ((RoundedButton) activeNavButton).setHoverColor(new Color(0xF3, 0xF4, 0xF6));
-        }
-
         activeNavButton = button;
-        
-        activeNavButton.setBackground(new Color(0x25, 0x63, 0xEB));
-        activeNavButton.setForeground(Color.WHITE);
-        String name = (String) activeNavButton.getClientProperty("iconName");
-        if (name != null) {
-            activeNavButton.setIcon(IconUtils.getIcon(name, 20, Color.WHITE));
-        }
-        ((RoundedButton) activeNavButton).setHoverColor(new Color(0x1D, 0x4E, 0xD8));
-
+        updateSidebarButtons();
         mainCardLayout.show(mainContentPanel, cardName);
     }
 
@@ -328,10 +361,16 @@ public class VaultFrame extends JFrame {
 
         createPasswordTable();
         JScrollPane tableScrollPane = new JScrollPane(passwordTable);
-        tableScrollPane.getViewport().setBackground(Color.WHITE);
-        tableScrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xE5, 0xE7, 0xEB), 1));
-        tableScrollPane.setOpaque(true);
-        splitContainer.add(tableScrollPane, BorderLayout.CENTER);
+        tableScrollPane.setOpaque(false);
+        tableScrollPane.getViewport().setOpaque(false);
+        tableScrollPane.setBorder(null);
+
+        roundedTableContainer = new RoundedPanel(12, ThemeManager.getBorderColor());
+        roundedTableContainer.setBackground(ThemeManager.getCardColor());
+        roundedTableContainer.setLayout(new BorderLayout());
+        roundedTableContainer.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        roundedTableContainer.add(tableScrollPane, BorderLayout.CENTER);
+        splitContainer.add(roundedTableContainer, BorderLayout.CENTER);
 
         createDetailsPanel();
         splitContainer.add(detailsCard, BorderLayout.EAST);
@@ -364,14 +403,14 @@ public class VaultFrame extends JFrame {
                 setFont(new Font("Segoe UI", Font.PLAIN, 12));
                 
                 if (isSelected) {
-                    c.setBackground(new Color(0xDB, 0xEA, 0xFE));
-                    c.setForeground(new Color(0x11, 0x18, 0x27));
+                    c.setBackground(ThemeManager.getTableSelection());
+                    c.setForeground(ThemeManager.isDark() ? Color.WHITE : new Color(0x11, 0x18, 0x27));
                 } else if (row == ((ModernJTable) table).getHoveredRow()) {
-                    c.setBackground(new Color(0xF3, 0xF4, 0xF6));
-                    c.setForeground(new Color(0x11, 0x18, 0x27));
+                    c.setBackground(ThemeManager.getTableHover());
+                    c.setForeground(ThemeManager.getTextPrimary());
                 } else {
-                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(0xF9, 0xFA, 0xFB));
-                    c.setForeground(new Color(0x11, 0x18, 0x27));
+                    c.setBackground(row % 2 == 0 ? ThemeManager.getCardColor() : ThemeManager.getTableAlternateRow());
+                    c.setForeground(ThemeManager.getTextPrimary());
                 }
                 return c;
             }
@@ -453,16 +492,16 @@ public class VaultFrame extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         
-        JLabel keyIcon = new JLabel();
-        keyIcon.setIcon(IconUtils.getIcon("vault", 48, new Color(0x9C, 0xA3, 0xAF)));
-        placeholderPanel.add(keyIcon, gbc);
+        placeholderKeyIcon = new JLabel();
+        placeholderKeyIcon.setIcon(IconUtils.getIcon("vault", 48, new Color(0x9C, 0xA3, 0xAF)));
+        placeholderPanel.add(placeholderKeyIcon, gbc);
 
-        JLabel infoText = new JLabel("Select an entry to view details");
-        infoText.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        infoText.setForeground(new Color(0x6B, 0x72, 0x80));
+        placeholderInfoText = new JLabel("Select an entry to view details");
+        placeholderInfoText.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        placeholderInfoText.setForeground(new Color(0x6B, 0x72, 0x80));
         gbc.gridy = 1;
         gbc.insets = new Insets(12, 0, 0, 0);
-        placeholderPanel.add(infoText, gbc);
+        placeholderPanel.add(placeholderInfoText, gbc);
 
         detailsCard.add(placeholderPanel, "PLACEHOLDER");
 
@@ -969,11 +1008,11 @@ public class VaultFrame extends JFrame {
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createEmptyBorder(16, 24, 16, 24));
 
-        RoundedPanel card = new RoundedPanel(12, new Color(0xE5, 0xE7, 0xEB));
-        card.setBackground(Color.WHITE);
-        card.setPreferredSize(new Dimension(650, 480));
-        card.setLayout(new GridBagLayout());
-        card.setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
+        generatorCard = new RoundedPanel(12, new Color(0xE5, 0xE7, 0xEB));
+        generatorCard.setBackground(Color.WHITE);
+        generatorCard.setPreferredSize(new Dimension(650, 480));
+        generatorCard.setLayout(new GridBagLayout());
+        generatorCard.setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -981,37 +1020,37 @@ public class VaultFrame extends JFrame {
         gbc.weightx = 1.0;
 
         // Title
-        JLabel titleLabel = new JLabel("Generate Strong Password");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(0x11, 0x18, 0x27));
+        generatorTitle = new JLabel("Generate Strong Password");
+        generatorTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        generatorTitle.setForeground(new Color(0x11, 0x18, 0x27));
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        card.add(titleLabel, gbc);
+        generatorCard.add(generatorTitle, gbc);
 
         // Display area
-        JTextArea passwordDisplay = new JTextArea(2, 40);
-        passwordDisplay.setFont(new Font("Consolas", Font.BOLD, 18));
-        passwordDisplay.setEditable(false);
-        passwordDisplay.setLineWrap(true);
-        passwordDisplay.setWrapStyleWord(true);
-        passwordDisplay.setBackground(new Color(0xF3, 0xF4, 0xF6));
-        passwordDisplay.setForeground(new Color(0x11, 0x18, 0x27));
-        passwordDisplay.setBorder(BorderFactory.createCompoundBorder(
+        generatorPasswordDisplay = new JTextArea(2, 40);
+        generatorPasswordDisplay.setFont(new Font("Consolas", Font.BOLD, 18));
+        generatorPasswordDisplay.setEditable(false);
+        generatorPasswordDisplay.setLineWrap(true);
+        generatorPasswordDisplay.setWrapStyleWord(true);
+        generatorPasswordDisplay.setBackground(new Color(0xF3, 0xF4, 0xF6));
+        generatorPasswordDisplay.setForeground(new Color(0x11, 0x18, 0x27));
+        generatorPasswordDisplay.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(0xE5, 0xE7, 0xEB)),
             BorderFactory.createEmptyBorder(12, 16, 12, 16)
         ));
 
         gbc.gridy = 1;
-        card.add(passwordDisplay, gbc);
+        generatorCard.add(generatorPasswordDisplay, gbc);
 
         // Length panel
         JPanel lengthPanel = new JPanel(new BorderLayout(16, 0));
         lengthPanel.setOpaque(false);
         
-        JLabel lengthTextLabel = new JLabel("Length: 16");
-        lengthTextLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lengthTextLabel.setForeground(new Color(0x37, 0x41, 0x51));
-        lengthPanel.add(lengthTextLabel, BorderLayout.WEST);
+        generatorLengthLabel = new JLabel("Length: 16");
+        generatorLengthLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        generatorLengthLabel.setForeground(new Color(0x37, 0x41, 0x51));
+        lengthPanel.add(generatorLengthLabel, BorderLayout.WEST);
 
         JSlider lengthSlider = new JSlider(8, 32, 16);
         lengthSlider.setOpaque(false);
@@ -1023,7 +1062,7 @@ public class VaultFrame extends JFrame {
         lengthPanel.add(lengthSlider, BorderLayout.CENTER);
 
         gbc.gridy = 2;
-        card.add(lengthPanel, gbc);
+        generatorCard.add(lengthPanel, gbc);
 
         // Checkboxes Panel
         JPanel checkboxes = new JPanel(new GridLayout(2, 2, 16, 12));
@@ -1040,11 +1079,11 @@ public class VaultFrame extends JFrame {
         checkboxes.add(symbolsCheckbox);
 
         gbc.gridy = 3;
-        card.add(checkboxes, gbc);
+        generatorCard.add(checkboxes, gbc);
 
         Runnable regenerate = () -> {
             int len = lengthSlider.getValue();
-            lengthTextLabel.setText("Length: " + len);
+            generatorLengthLabel.setText("Length: " + len);
             boolean useLower = lowercaseCheckbox.isSelected();
             boolean useUpper = uppercaseCheckbox.isSelected();
             boolean useDigits = digitsCheckbox.isSelected();
@@ -1054,10 +1093,14 @@ public class VaultFrame extends JFrame {
                 useLower = true;
             }
             String pwd = PasswordGenerator.generatePassword(len, useLower, useUpper, useDigits, useSymbols);
-            passwordDisplay.setText(pwd);
+            generatorPasswordDisplay.setText(pwd);
         };
 
-        lengthSlider.addChangeListener(e -> regenerate.run());
+        lengthSlider.addChangeListener(e -> {
+            int len = lengthSlider.getValue();
+            generatorLengthLabel.setText("Length: " + len);
+            regenerate.run();
+        });
         lowercaseCheckbox.addActionListener(e -> regenerate.run());
         uppercaseCheckbox.addActionListener(e -> regenerate.run());
         digitsCheckbox.addActionListener(e -> regenerate.run());
@@ -1067,34 +1110,33 @@ public class VaultFrame extends JFrame {
         JPanel actionButtons = new JPanel(new FlowLayout(FlowLayout.CENTER, 16, 0));
         actionButtons.setOpaque(false);
 
-        RoundedButton regenBtn = new RoundedButton("Regenerate", 10);
-        regenBtn.setIcon(IconUtils.getIcon("wand-sparkles", 16, new Color(0x37, 0x41, 0x51)));
-        regenBtn.setIconTextGap(8);
-        regenBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        regenBtn.setPreferredSize(new Dimension(150, 36));
-        regenBtn.setBackground(new Color(0xF3, 0xF4, 0xF6));
-        regenBtn.setForeground(new Color(0x37, 0x41, 0x51));
-        regenBtn.setHoverColor(new Color(0xE5, 0xE7, 0xEB));
-        regenBtn.addActionListener(e -> regenerate.run());
-        actionButtons.add(regenBtn);
+        generatorRegenBtn = new RoundedButton("Regenerate", 10);
+        generatorRegenBtn.setIcon(IconUtils.getIcon("wand-sparkles", 16, new Color(0x37, 0x41, 0x51)));
+        generatorRegenBtn.setIconTextGap(8);
+        generatorRegenBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        generatorRegenBtn.setPreferredSize(new Dimension(150, 36));
+        generatorRegenBtn.setBackground(new Color(0xF3, 0xF4, 0xF6));
+        generatorRegenBtn.setForeground(new Color(0x37, 0x41, 0x51));
+        generatorRegenBtn.addActionListener(e -> regenerate.run());
+        actionButtons.add(generatorRegenBtn);
 
-        RoundedButton copyBtn = new RoundedButton("Copy Password", 10);
-        copyBtn.setIcon(IconUtils.getIcon("copy", 16, Color.WHITE));
-        copyBtn.setIconTextGap(8);
-        copyBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        copyBtn.setPreferredSize(new Dimension(150, 36));
-        copyBtn.setBackground(new Color(0x25, 0x63, 0xEB));
-        copyBtn.setForeground(Color.WHITE);
-        copyBtn.addActionListener(e -> copyTextToClipboard(passwordDisplay.getText(), "Generated password copied!"));
-        actionButtons.add(copyBtn);
+        generatorCopyBtn = new RoundedButton("Copy Password", 10);
+        generatorCopyBtn.setIcon(IconUtils.getIcon("copy", 16, Color.WHITE));
+        generatorCopyBtn.setIconTextGap(8);
+        generatorCopyBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        generatorCopyBtn.setPreferredSize(new Dimension(150, 36));
+        generatorCopyBtn.setBackground(new Color(0x25, 0x63, 0xEB));
+        generatorCopyBtn.setForeground(Color.WHITE);
+        generatorCopyBtn.addActionListener(e -> copyTextToClipboard(generatorPasswordDisplay.getText(), "Generated password copied!"));
+        actionButtons.add(generatorCopyBtn);
 
         gbc.gridy = 4;
         gbc.insets = new Insets(16, 0, 0, 0);
-        card.add(actionButtons, gbc);
+        generatorCard.add(actionButtons, gbc);
 
         regenerate.run();
 
-        panel.add(card, new GridBagConstraints());
+        panel.add(generatorCard, new GridBagConstraints());
         return panel;
     }
 
@@ -1112,11 +1154,11 @@ public class VaultFrame extends JFrame {
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createEmptyBorder(16, 24, 16, 24));
 
-        RoundedPanel card = new RoundedPanel(12, new Color(0xE5, 0xE7, 0xEB));
-        card.setBackground(Color.WHITE);
-        card.setPreferredSize(new Dimension(650, 480));
-        card.setLayout(new GridBagLayout());
-        card.setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
+        settingsCard = new RoundedPanel(12, new Color(0xE5, 0xE7, 0xEB));
+        settingsCard.setBackground(Color.WHITE);
+        settingsCard.setPreferredSize(new Dimension(650, 480));
+        settingsCard.setLayout(new GridBagLayout());
+        settingsCard.setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -1124,19 +1166,19 @@ public class VaultFrame extends JFrame {
         gbc.weightx = 1.0;
         gbc.anchor = GridBagConstraints.NORTHWEST;
 
-        JLabel title = new JLabel("Settings & Preferences");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        title.setForeground(new Color(0x11, 0x18, 0x27));
+        settingsTitle = new JLabel("Settings & Preferences");
+        settingsTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        settingsTitle.setForeground(new Color(0x11, 0x18, 0x27));
         gbc.gridy = 0;
-        card.add(title, gbc);
+        settingsCard.add(settingsTitle, gbc);
 
-        card.add(createFieldDivider(), getDividerConstraints(1));
+        settingsCard.add(createFieldDivider(), getDividerConstraints(1));
 
-        JLabel info = new JLabel("<html><body><b>Local Database Settings</b><br>Data is stored locally on your machine in encrypted JSON files using AES-256-GCM.</body></html>");
-        info.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        info.setForeground(new Color(0x37, 0x41, 0x51));
+        settingsInfo = new JLabel("<html><body><b>Local Database Settings</b><br>Data is stored locally on your machine in encrypted JSON files using AES-256-GCM.</body></html>");
+        settingsInfo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        settingsInfo.setForeground(new Color(0x37, 0x41, 0x51));
         gbc.gridy = 2;
-        card.add(info, gbc);
+        settingsCard.add(settingsInfo, gbc);
 
         // Security controls
         JPanel securityControls = new JPanel(new GridBagLayout());
@@ -1149,49 +1191,77 @@ public class VaultFrame extends JFrame {
         scGbc.insets = new Insets(8, 0, 8, 0);
 
         // Password Recovery Setup
-        JLabel recoveryInfo = new JLabel("<html><body><b>Password Recovery</b><br>Configure a security question to recover your vault if you forget your master password.</body></html>");
-        recoveryInfo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        recoveryInfo.setForeground(new Color(0x37, 0x41, 0x51));
+        settingsRecoveryInfo = new JLabel("<html><body><b>Password Recovery</b><br>Configure a security question to recover your vault if you forget your master password.</body></html>");
+        settingsRecoveryInfo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        settingsRecoveryInfo.setForeground(new Color(0x37, 0x41, 0x51));
         scGbc.gridy = 0;
-        securityControls.add(recoveryInfo, scGbc);
+        securityControls.add(settingsRecoveryInfo, scGbc);
 
-        RoundedButton configureRecoveryBtn = new RoundedButton("Configure Recovery Question", 10);
-        configureRecoveryBtn.setIcon(IconUtils.getIcon("key-round", 16, Color.WHITE));
-        configureRecoveryBtn.setIconTextGap(8);
-        configureRecoveryBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        configureRecoveryBtn.setPreferredSize(new Dimension(250, 36));
-        configureRecoveryBtn.setBackground(new Color(0x25, 0x63, 0xEB));
-        configureRecoveryBtn.setForeground(Color.WHITE);
-        configureRecoveryBtn.addActionListener(e -> showUpdateRecoveryDialog());
+        settingsConfigureRecoveryBtn = new RoundedButton("Configure Recovery Question", 10);
+        settingsConfigureRecoveryBtn.setIcon(IconUtils.getIcon("key-round", 16, Color.WHITE));
+        settingsConfigureRecoveryBtn.setIconTextGap(8);
+        settingsConfigureRecoveryBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        settingsConfigureRecoveryBtn.setPreferredSize(new Dimension(250, 36));
+        settingsConfigureRecoveryBtn.setBackground(new Color(0x25, 0x63, 0xEB));
+        settingsConfigureRecoveryBtn.setForeground(Color.WHITE);
+        settingsConfigureRecoveryBtn.addActionListener(e -> showUpdateRecoveryDialog());
         
         scGbc.gridy = 1;
         scGbc.insets = new Insets(4, 0, 16, 0);
-        securityControls.add(configureRecoveryBtn, scGbc);
+        securityControls.add(settingsConfigureRecoveryBtn, scGbc);
 
         // Reset Vault Button
-        JLabel warningText = new JLabel("<html><body><font color='#DC2626'><b>CRITICAL WARNING:</b></font> Resetting your vault will permanently delete all stored credentials. This action is irreversible.</body></html>");
-        warningText.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        settingsWarningText = new JLabel("<html><body><font color='#DC2626'><b>CRITICAL WARNING:</b></font> Resetting your vault will permanently delete all stored credentials. This action is irreversible.</body></html>");
+        settingsWarningText.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         scGbc.gridy = 2;
         scGbc.insets = new Insets(12, 0, 4, 0);
-        securityControls.add(warningText, scGbc);
+        securityControls.add(settingsWarningText, scGbc);
 
-        RoundedButton resetBtn = new RoundedButton("Reset Vault Database", 10);
-        resetBtn.setIcon(IconUtils.getIcon("trash-2", 16, Color.WHITE));
-        resetBtn.setIconTextGap(8);
-        resetBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        resetBtn.setPreferredSize(new Dimension(250, 36));
-        resetBtn.setBackground(new Color(0xDC, 0x26, 0x26));
-        resetBtn.setForeground(Color.WHITE);
-        resetBtn.addActionListener(e -> resetVaultFlow());
+        settingsResetBtn = new RoundedButton("Reset Vault Database", 10);
+        settingsResetBtn.setIcon(IconUtils.getIcon("trash-2", 16, Color.WHITE));
+        settingsResetBtn.setIconTextGap(8);
+        settingsResetBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        settingsResetBtn.setPreferredSize(new Dimension(250, 36));
+        settingsResetBtn.setBackground(new Color(0xDC, 0x26, 0x26));
+        settingsResetBtn.setForeground(Color.WHITE);
+        settingsResetBtn.addActionListener(e -> resetVaultFlow());
         
         scGbc.gridy = 3;
         scGbc.insets = new Insets(4, 0, 12, 0);
-        securityControls.add(resetBtn, scGbc);
+        securityControls.add(settingsResetBtn, scGbc);
+
+        // Theme preference controls
+        settingsThemeTitle = new JLabel("<html><body><b>App Theme</b></body></html>");
+        settingsThemeTitle.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        settingsThemeTitle.setForeground(new Color(0x37, 0x41, 0x51));
+        scGbc.gridy = 4;
+        scGbc.insets = new Insets(12, 0, 4, 0);
+        securityControls.add(settingsThemeTitle, scGbc);
+
+        settingsThemeInfo = new JLabel("Toggle between dynamic light and modern dark themes.");
+        settingsThemeInfo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        settingsThemeInfo.setForeground(new Color(0x6B, 0x72, 0x80));
+        scGbc.gridy = 5;
+        scGbc.insets = new Insets(0, 0, 8, 0);
+        securityControls.add(settingsThemeInfo, scGbc);
+
+        settingsThemeBtn = new RoundedButton("Switch to Dark Theme", 10);
+        settingsThemeBtn.setIcon(IconUtils.getIcon("moon", 16, new Color(0x37, 0x41, 0x51)));
+        settingsThemeBtn.setIconTextGap(8);
+        settingsThemeBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        settingsThemeBtn.setPreferredSize(new Dimension(250, 36));
+        settingsThemeBtn.addActionListener(e -> {
+            ThemeManager.toggleTheme();
+            applyTheme();
+        });
+        scGbc.gridy = 6;
+        scGbc.insets = new Insets(4, 0, 12, 0);
+        securityControls.add(settingsThemeBtn, scGbc);
 
         gbc.gridy = 3;
-        card.add(securityControls, gbc);
+        settingsCard.add(securityControls, gbc);
 
-        panel.add(card, new GridBagConstraints());
+        panel.add(settingsCard, new GridBagConstraints());
         return panel;
     }
 
@@ -1274,40 +1344,40 @@ public class VaultFrame extends JFrame {
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createEmptyBorder(16, 24, 16, 24));
 
-        RoundedPanel card = new RoundedPanel(12, new Color(0xE5, 0xE7, 0xEB));
-        card.setBackground(Color.WHITE);
-        card.setPreferredSize(new Dimension(650, 480));
-        card.setLayout(new GridBagLayout());
-        card.setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
+        aboutCard = new RoundedPanel(12, new Color(0xE5, 0xE7, 0xEB));
+        aboutCard.setBackground(Color.WHITE);
+        aboutCard.setPreferredSize(new Dimension(650, 480));
+        aboutCard.setLayout(new GridBagLayout());
+        aboutCard.setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(10, 0, 10, 0);
 
-        JLabel logo = new JLabel();
-        logo.setIcon(IconUtils.getIcon("shield", 64, new Color(0x25, 0x63, 0xEB)));
+        aboutLogo = new JLabel();
+        aboutLogo.setIcon(IconUtils.getIcon("logo", 64, new Color(0x25, 0x63, 0xEB)));
         gbc.gridy = 0;
-        card.add(logo, gbc);
+        aboutCard.add(aboutLogo, gbc);
 
-        JLabel title = new JLabel("PassVault");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setForeground(new Color(0x11, 0x18, 0x27));
+        aboutTitle = new JLabel("PassVault");
+        aboutTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        aboutTitle.setForeground(new Color(0x11, 0x18, 0x27));
         gbc.gridy = 1;
-        card.add(title, gbc);
+        aboutCard.add(aboutTitle, gbc);
 
-        JLabel version = new JLabel("v1.0.0 (Stable Edition)");
-        version.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        version.setForeground(new Color(0x6B, 0x72, 0x80));
+        aboutVersion = new JLabel("v1.0.0 (Stable Edition)");
+        aboutVersion.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        aboutVersion.setForeground(new Color(0x6B, 0x72, 0x80));
         gbc.gridy = 2;
-        card.add(version, gbc);
+        aboutCard.add(aboutVersion, gbc);
 
-        JLabel desc = new JLabel("<html><center>A secure, military-grade encrypted password manager designed to keep your credentials stored locally on disk. Passwords never touch the cloud.</center></html>");
-        desc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        desc.setForeground(new Color(0x37, 0x41, 0x51));
-        desc.setPreferredSize(new Dimension(400, 60));
+        aboutDesc = new JLabel("<html><center>A secure, military-grade encrypted password manager designed to keep your credentials stored locally on disk. Passwords never touch the cloud.</center></html>");
+        aboutDesc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        aboutDesc.setForeground(new Color(0x37, 0x41, 0x51));
+        aboutDesc.setPreferredSize(new Dimension(400, 60));
         gbc.gridy = 3;
-        card.add(desc, gbc);
+        aboutCard.add(aboutDesc, gbc);
 
         JPanel featuresPanel = new JPanel(new GridLayout(4, 1, 0, 6));
         featuresPanel.setOpaque(false);
@@ -1318,16 +1388,16 @@ public class VaultFrame extends JFrame {
 
         gbc.gridy = 4;
         gbc.insets = new Insets(12, 0, 12, 0);
-        card.add(featuresPanel, gbc);
+        aboutCard.add(featuresPanel, gbc);
 
-        JLabel copyright = new JLabel("© 2026 PassVault Open Source Contributors");
-        copyright.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        copyright.setForeground(new Color(0x9C, 0xA3, 0xAF));
+        aboutCopyright = new JLabel("© 2026 PassVault Open Source Contributors");
+        aboutCopyright.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        aboutCopyright.setForeground(new Color(0x9C, 0xA3, 0xAF));
         gbc.gridy = 5;
         gbc.insets = new Insets(20, 0, 0, 0);
-        card.add(copyright, gbc);
+        aboutCard.add(aboutCopyright, gbc);
 
-        panel.add(card, new GridBagConstraints());
+        panel.add(aboutCard, new GridBagConstraints());
         return panel;
     }
 
@@ -1416,17 +1486,17 @@ public class VaultFrame extends JFrame {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                        boolean isSelected, boolean hasFocus, int row, int column) {
-            Color grayColor = isSelected ? table.getSelectionForeground() : new Color(0x6B, 0x72, 0x80);
+            Color grayColor = isSelected ? (ThemeManager.isDark() ? Color.WHITE : new Color(0x11, 0x18, 0x27)) : ThemeManager.getTextSecondary();
 
             if (isSelected) {
-                setBackground(new Color(0xDB, 0xEA, 0xFE));
-                maskLabel.setForeground(new Color(0x11, 0x18, 0x27));
+                setBackground(ThemeManager.getTableSelection());
+                maskLabel.setForeground(ThemeManager.isDark() ? Color.WHITE : new Color(0x11, 0x18, 0x27));
             } else if (row == ((ModernJTable) table).getHoveredRow()) {
-                setBackground(new Color(0xF3, 0xF4, 0xF6));
-                maskLabel.setForeground(new Color(0x11, 0x18, 0x27));
+                setBackground(ThemeManager.getTableHover());
+                maskLabel.setForeground(ThemeManager.getTextPrimary());
             } else {
-                setBackground(row % 2 == 0 ? Color.WHITE : new Color(0xF9, 0xFA, 0xFB));
-                maskLabel.setForeground(new Color(0x11, 0x18, 0x27));
+                setBackground(row % 2 == 0 ? ThemeManager.getCardColor() : ThemeManager.getTableAlternateRow());
+                maskLabel.setForeground(ThemeManager.getTextPrimary());
             }
 
             boolean visible = ((ModernJTable) table).isRowPasswordVisible(row);
@@ -1453,16 +1523,16 @@ public class VaultFrame extends JFrame {
             String url = (value != null) ? value.toString() : "";
             if (!url.isEmpty()) {
                 setText("<html><u>" + url + "</u></html>");
-                setForeground(new Color(0x25, 0x63, 0xEB));
+                setForeground(ThemeManager.getBlueAccent());
             } else {
                 setText("");
             }
             if (isSelected) {
-                setBackground(new Color(0xDB, 0xEA, 0xFE));
+                setBackground(ThemeManager.getTableSelection());
             } else if (row == ((ModernJTable) table).getHoveredRow()) {
-                setBackground(new Color(0xF3, 0xF4, 0xF6));
+                setBackground(ThemeManager.getTableHover());
             } else {
-                setBackground(row % 2 == 0 ? Color.WHITE : new Color(0xF9, 0xFA, 0xFB));
+                setBackground(row % 2 == 0 ? ThemeManager.getCardColor() : ThemeManager.getTableAlternateRow());
             }
             setFont(new Font("Segoe UI", Font.PLAIN, 12));
             return this;
@@ -1487,34 +1557,59 @@ public class VaultFrame extends JFrame {
             label.setText(strength.toUpperCase());
 
             if (isSelected) {
-                setBackground(new Color(0xDB, 0xEA, 0xFE));
+                setBackground(ThemeManager.getTableSelection());
             } else if (row == ((ModernJTable) table).getHoveredRow()) {
-                setBackground(new Color(0xF3, 0xF4, 0xF6));
+                setBackground(ThemeManager.getTableHover());
             } else {
-                setBackground(row % 2 == 0 ? Color.WHITE : new Color(0xF9, 0xFA, 0xFB));
+                setBackground(row % 2 == 0 ? ThemeManager.getCardColor() : ThemeManager.getTableAlternateRow());
             }
 
-            switch (strength) {
-                case "Weak":
-                    label.setForeground(new Color(0x99, 0x1B, 0x1B));
-                    label.setBackground(new Color(0xFE, 0xE2, 0xE2));
-                    break;
-                case "Medium":
-                    label.setForeground(new Color(0x92, 0x40, 0x0E));
-                    label.setBackground(new Color(0xFE, 0xF3, 0xCB));
-                    break;
-                case "Strong":
-                    label.setForeground(new Color(0x06, 0x5F, 0x46));
-                    label.setBackground(new Color(0xD1, 0xFA, 0xE5));
-                    break;
-                case "Very Strong":
-                    label.setForeground(new Color(0x06, 0x4E, 0x3B));
-                    label.setBackground(new Color(0xA7, 0xF3, 0xD0));
-                    break;
-                default:
-                    label.setForeground(new Color(0x37, 0x41, 0x51));
-                    label.setBackground(new Color(0xF3, 0xF4, 0xF6));
-                    break;
+            if (ThemeManager.isDark()) {
+                switch (strength) {
+                    case "Weak":
+                        label.setForeground(new Color(0xEF, 0x44, 0x44)); // Destructive Red
+                        label.setBackground(new Color(0x45, 0x27, 0x27));
+                        break;
+                    case "Medium":
+                        label.setForeground(new Color(0xFB, 0xBF, 0x24)); // Warning Amber
+                        label.setBackground(new Color(0x45, 0x38, 0x23));
+                        break;
+                    case "Strong":
+                        label.setForeground(new Color(0x34, 0xD3, 0x99));
+                        label.setBackground(new Color(0x23, 0x45, 0x38));
+                        break;
+                    case "Very Strong":
+                        label.setForeground(new Color(0x34, 0xD3, 0x99));
+                        label.setBackground(new Color(0x23, 0x45, 0x38));
+                        break;
+                    default:
+                        label.setForeground(ThemeManager.getTextSecondary());
+                        label.setBackground(ThemeManager.getTableHover());
+                        break;
+                }
+            } else {
+                switch (strength) {
+                    case "Weak":
+                        label.setForeground(new Color(0x99, 0x1B, 0x1B));
+                        label.setBackground(new Color(0xFE, 0xE2, 0xE2));
+                        break;
+                    case "Medium":
+                        label.setForeground(new Color(0x92, 0x40, 0x0E));
+                        label.setBackground(new Color(0xFE, 0xF3, 0xCB));
+                        break;
+                    case "Strong":
+                        label.setForeground(new Color(0x06, 0x5F, 0x46));
+                        label.setBackground(new Color(0xD1, 0xFA, 0xE5));
+                        break;
+                    case "Very Strong":
+                        label.setForeground(new Color(0x06, 0x4E, 0x3B));
+                        label.setBackground(new Color(0xA7, 0xF3, 0xD0));
+                        break;
+                    default:
+                        label.setForeground(new Color(0x37, 0x41, 0x51));
+                        label.setBackground(new Color(0xF3, 0xF4, 0xF6));
+                        break;
+                }
             }
 
             return this;
@@ -1538,6 +1633,230 @@ public class VaultFrame extends JFrame {
             Graphics gLabel = g.create(x + 6, y + (h - label.getPreferredSize().height) / 2, label.getPreferredSize().width, label.getPreferredSize().height);
             label.paint(gLabel);
             gLabel.dispose();
+        }
+    }
+
+    public void applyTheme() {
+        boolean dark = ThemeManager.isDark();
+        
+        // 1. Frame and Content Pane
+        getContentPane().setBackground(ThemeManager.getBgColor());
+        
+        // 2. Header Panel
+        headerPanel.setBackground(dark ? ThemeManager.DARK_CARD : new Color(0x1F, 0x29, 0x37)); // Charcoal or Dark Slate
+        headerTitleLabel.setForeground(Color.WHITE); // Keep white text for high contrast header
+        lastUsedLabel.setForeground(dark ? ThemeManager.DARK_TEXT_SECONDARY : new Color(0x9C, 0xA3, 0xAF));
+        
+        entryCountBadge.setForeground(Color.WHITE);
+        entryCountBadge.setBackground(dark ? ThemeManager.DARK_BG : new Color(0x37, 0x41, 0x51));
+        entryCountBadge.setIcon(IconUtils.getIcon("archive", 18, Color.WHITE));
+        badgePanel.setBackground(dark ? ThemeManager.DARK_BG : new Color(0x37, 0x41, 0x51));
+        
+        lockButton.setBackground(ThemeManager.getDestructiveRed());
+        lockButton.setIcon(IconUtils.getIcon("lock", 18, Color.WHITE));
+        
+        // 3. Sidebar
+        sidebar.setBackground(dark ? ThemeManager.DARK_BG : Color.WHITE);
+        sidebar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 0, 1, ThemeManager.getBorderColor()),
+            BorderFactory.createEmptyBorder(0, 16, 0, 16)
+        ));
+        
+        // Update sidebar section titles
+        navTitle.setForeground(ThemeManager.getTextSecondary());
+        actionsTitle.setForeground(ThemeManager.getTextSecondary());
+        systemTitle.setForeground(ThemeManager.getTextSecondary());
+        
+        updateSidebarButtons();
+
+        // 4. Vault View & Table Container
+        roundedTableContainer.setBorderColor(ThemeManager.getBorderColor());
+        roundedTableContainer.setBackground(ThemeManager.getCardColor());
+        
+        // JTable header
+        JTableHeader header = passwordTable.getTableHeader();
+        header.setBackground(dark ? ThemeManager.DARK_CARD : new Color(0xF8, 0xF9, 0xFB));
+        header.setForeground(ThemeManager.getTextSecondary());
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ThemeManager.getBorderColor()));
+        
+        // 5. Details Panel
+        detailsCard.setBorderColor(ThemeManager.getBorderColor());
+        detailsCard.setBackground(ThemeManager.getCardColor());
+        
+        placeholderKeyIcon.setIcon(IconUtils.getIcon("vault", 48, ThemeManager.getTextSecondary()));
+        placeholderInfoText.setForeground(ThemeManager.getTextSecondary());
+        
+        detailsTitleLabel.setForeground(ThemeManager.getTextPrimary());
+        
+        // Refresh details components
+        refreshDetailsComponentsStyle();
+
+        // 6. Generator Panel
+        generatorCard.setBorderColor(ThemeManager.getBorderColor());
+        generatorCard.setBackground(ThemeManager.getCardColor());
+        generatorTitle.setForeground(ThemeManager.getTextPrimary());
+        generatorPasswordDisplay.setBackground(dark ? ThemeManager.DARK_BG : new Color(0xF3, 0xF4, 0xF6));
+        generatorPasswordDisplay.setForeground(ThemeManager.getTextPrimary());
+        generatorPasswordDisplay.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ThemeManager.getBorderColor()),
+            BorderFactory.createEmptyBorder(12, 16, 12, 16)
+        ));
+        generatorLengthLabel.setForeground(ThemeManager.getTextPrimary());
+        generatorRegenBtn.setBackground(dark ? ThemeManager.DARK_BG : new Color(0xF3, 0xF4, 0xF6));
+        generatorRegenBtn.setForeground(ThemeManager.getTextPrimary());
+        generatorRegenBtn.setIcon(IconUtils.getIcon("wand-sparkles", 16, ThemeManager.getTextPrimary()));
+        generatorCopyBtn.setBackground(ThemeManager.getBlueAccent());
+        generatorCopyBtn.setForeground(Color.WHITE);
+        generatorCopyBtn.setIcon(IconUtils.getIcon("copy", 16, Color.WHITE));
+        
+        // 7. Settings Panel
+        settingsCard.setBorderColor(ThemeManager.getBorderColor());
+        settingsCard.setBackground(ThemeManager.getCardColor());
+        settingsTitle.setForeground(ThemeManager.getTextPrimary());
+        settingsInfo.setForeground(ThemeManager.getTextPrimary());
+        settingsRecoveryInfo.setForeground(ThemeManager.getTextPrimary());
+        settingsConfigureRecoveryBtn.setBackground(ThemeManager.getBlueAccent());
+        settingsConfigureRecoveryBtn.setForeground(Color.WHITE);
+        settingsConfigureRecoveryBtn.setIcon(IconUtils.getIcon("key-round", 16, Color.WHITE));
+        settingsWarningText.setForeground(ThemeManager.getDestructiveRed());
+        settingsResetBtn.setBackground(ThemeManager.getDestructiveRed());
+        settingsResetBtn.setForeground(Color.WHITE);
+        settingsResetBtn.setIcon(IconUtils.getIcon("trash-2", 16, Color.WHITE));
+        settingsThemeTitle.setForeground(ThemeManager.getTextPrimary());
+        settingsThemeInfo.setForeground(ThemeManager.getTextPrimary());
+        settingsThemeBtn.setBackground(dark ? ThemeManager.DARK_BG : new Color(0xF3, 0xF4, 0xF6));
+        settingsThemeBtn.setForeground(ThemeManager.getTextPrimary());
+        settingsThemeBtn.setIcon(IconUtils.getIcon(dark ? "sun" : "moon", 16, ThemeManager.getTextPrimary()));
+        settingsThemeBtn.setText(dark ? "Switch to Light Theme" : "Switch to Dark Theme");
+
+        // 8. About Panel
+        aboutCard.setBorderColor(ThemeManager.getBorderColor());
+        aboutCard.setBackground(ThemeManager.getCardColor());
+        aboutLogo.setIcon(IconUtils.getIcon("logo", 64, ThemeManager.getBlueAccent()));
+        aboutTitle.setForeground(ThemeManager.getTextPrimary());
+        aboutVersion.setForeground(ThemeManager.getTextSecondary());
+        aboutDesc.setForeground(ThemeManager.getTextPrimary());
+        aboutCopyright.setForeground(ThemeManager.getTextSecondary());
+        
+        // Refresh items
+        refreshTable();
+        
+        // Repaint all components
+        revalidate();
+        repaint();
+    }
+
+    private void updateSidebarButtons() {
+        if (sidebar == null) return;
+        Component[] components = sidebar.getComponents();
+        for (Component comp : components) {
+            if (comp instanceof RoundedButton) {
+                RoundedButton btn = (RoundedButton) comp;
+                String iconName = (String) btn.getClientProperty("iconName");
+                if (iconName != null) {
+                    if (btn == activeNavButton) {
+                        btn.setBackground(ThemeManager.isDark() ? new Color(0x2A, 0x2D, 0x3A) : new Color(0xE5, 0xE7, 0xEB));
+                        btn.setForeground(ThemeManager.getBlueAccent());
+                        btn.setIcon(IconUtils.getIcon(iconName, 20, ThemeManager.getBlueAccent()));
+                    } else {
+                        btn.setBackground(ThemeManager.isDark() ? ThemeManager.DARK_BG : Color.WHITE);
+                        btn.setForeground(ThemeManager.getTextPrimary());
+                        btn.setIcon(IconUtils.getIcon(iconName, 20, ThemeManager.getTextSecondary()));
+                    }
+                } else {
+                    if (btn.getText().equals("Delete Entry")) {
+                        btn.setBackground(ThemeManager.isDark() ? ThemeManager.DARK_BG : Color.WHITE);
+                        btn.setForeground(ThemeManager.getDestructiveRed());
+                        btn.setIcon(IconUtils.getIcon("trash-2", 18, ThemeManager.getDestructiveRed()));
+                    } else {
+                        btn.setBackground(ThemeManager.isDark() ? ThemeManager.DARK_BG : Color.WHITE);
+                        btn.setForeground(ThemeManager.getTextPrimary());
+                        String name = getActionIconName(btn.getText());
+                        btn.setIcon(IconUtils.getIcon(name, 18, ThemeManager.getTextSecondary()));
+                    }
+                }
+            }
+        }
+    }
+
+    private String getActionIconName(String text) {
+        if (text.startsWith("Add")) return "plus";
+        if (text.startsWith("Edit")) return "pencil";
+        if (text.startsWith("Delete")) return "trash-2";
+        if (text.startsWith("Copy")) return "copy";
+        return "info";
+    }
+
+    private void refreshDetailsComponentsStyle() {
+        if (detailsUsernameField == null || detailsPasswordField == null) return;
+        boolean dark = ThemeManager.isDark();
+        
+        detailsUsernameField.setBackground(ThemeManager.getCardColor());
+        detailsUsernameField.setForeground(ThemeManager.getTextPrimary());
+        detailsUsernameField.setCaretColor(ThemeManager.getTextPrimary());
+        
+        detailsPasswordField.setBackground(ThemeManager.getCardColor());
+        detailsPasswordField.setForeground(ThemeManager.getTextPrimary());
+        detailsPasswordField.setCaretColor(ThemeManager.getTextPrimary());
+        
+        detailsNotesArea.setBackground(dark ? ThemeManager.getBgColor() : new Color(0xF9, 0xFA, 0xFB));
+        detailsNotesArea.setForeground(ThemeManager.getTextPrimary());
+        detailsNotesArea.setCaretColor(ThemeManager.getTextPrimary());
+        
+        btnCopyUser.setBackground(dark ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        btnCopyUser.setIcon(IconUtils.getIcon("copy", 16, dark ? ThemeManager.getTextPrimary() : new Color(0x37, 0x41, 0x51)));
+        
+        boolean showPass = (detailsPasswordField.getEchoChar() == (char) 0);
+        btnTogglePass.setBackground(dark ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        btnTogglePass.setIcon(IconUtils.getIcon(showPass ? "eye-off" : "eye", 16, dark ? ThemeManager.getTextPrimary() : new Color(0x37, 0x41, 0x51)));
+        
+        btnCopyPass.setBackground(dark ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        btnCopyPass.setIcon(IconUtils.getIcon("copy", 16, dark ? ThemeManager.getTextPrimary() : new Color(0x37, 0x41, 0x51)));
+        
+        btnOpenUrl.setBackground(dark ? ThemeManager.getBgColor() : new Color(0xF3, 0xF4, 0xF6));
+        btnOpenUrl.setIcon(IconUtils.getIcon("external-link", 16, dark ? ThemeManager.getTextPrimary() : new Color(0x37, 0x41, 0x51)));
+        
+        btnEditDetail.setBackground(ThemeManager.getBlueAccent());
+        btnEditDetail.setForeground(Color.WHITE);
+        btnEditDetail.setIcon(IconUtils.getIcon("pencil", 16, Color.WHITE));
+        
+        btnDeleteDetail.setBackground(ThemeManager.getDestructiveRed());
+        btnDeleteDetail.setForeground(Color.WHITE);
+        btnDeleteDetail.setIcon(IconUtils.getIcon("trash-2", 16, Color.WHITE));
+        
+        if (detailsContent != null) {
+            updateSubcomponentsTheme(detailsContent);
+        }
+    }
+
+    private void updateSubcomponentsTheme(Container container) {
+        boolean dark = ThemeManager.isDark();
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JLabel) {
+                JLabel l = (JLabel) comp;
+                if (l == detailsUrlLabel) {
+                    l.setForeground(ThemeManager.getBlueAccent());
+                } else if (l == detailsStrengthText) {
+                    // Handled in updateDetailsPanel
+                } else if (l == detailsCreatedLabel || l == detailsModifiedLabel) {
+                    l.setForeground(ThemeManager.getTextSecondary());
+                    String icon = (l == detailsCreatedLabel) ? "calendar" : "clock";
+                    l.setIcon(IconUtils.getIcon(icon, 14, ThemeManager.getTextSecondary()));
+                } else {
+                    l.setForeground(ThemeManager.getTextSecondary());
+                }
+            } else if (comp instanceof JScrollPane) {
+                JScrollPane sp = (JScrollPane) comp;
+                sp.setBorder(BorderFactory.createLineBorder(ThemeManager.getBorderColor()));
+                sp.getViewport().setBackground(ThemeManager.isDark() ? ThemeManager.getBgColor() : new Color(0xF9, 0xFA, 0xFB));
+            } else if (comp instanceof JPanel) {
+                JPanel p = (JPanel) comp;
+                if (p.getPreferredSize() != null && p.getPreferredSize().height == 1 && p.getPreferredSize().width == 280) {
+                    p.setBackground(ThemeManager.getBorderColor());
+                } else {
+                    updateSubcomponentsTheme(p);
+                }
+            }
         }
     }
 }

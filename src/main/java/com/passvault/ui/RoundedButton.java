@@ -10,6 +10,8 @@ public class RoundedButton extends JButton {
     private int cornerRadius = 12;
     private Color hoverColor;
     private Color pressedColor;
+    private boolean isCustomHover = false;
+    private boolean isCustomPressed = false;
 
     public RoundedButton(String text) {
         super(text);
@@ -45,38 +47,70 @@ public class RoundedButton extends JButton {
     public void setBackground(Color bg) {
         super.setBackground(bg);
         if (bg != null) {
-            // Derive nice hover/pressed colors from the background
-            int r = bg.getRed();
-            int g = bg.getGreen();
-            int b = bg.getBlue();
-            
-            // For dark colors, make hover lighter. For light colors, make hover darker.
-            int brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            int offset = brightness > 128 ? -15 : 20;
-            
-            this.hoverColor = new Color(
-                Math.max(0, Math.min(255, r + offset)),
-                Math.max(0, Math.min(255, g + offset)),
-                Math.max(0, Math.min(255, b + offset))
-            );
-            this.pressedColor = new Color(
-                Math.max(0, Math.min(255, r + 2 * offset)),
-                Math.max(0, Math.min(255, g + 2 * offset)),
-                Math.max(0, Math.min(255, b + 2 * offset))
-            );
+            if (!isCustomHover) {
+                this.hoverColor = calculateHoverColor(bg);
+            }
+            if (!isCustomPressed) {
+                this.pressedColor = calculatePressedColor(bg);
+            }
         }
+    }
+
+    private Color calculateHoverColor(Color bg) {
+        int r = bg.getRed();
+        int g = bg.getGreen();
+        int b = bg.getBlue();
+        int brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        int offset = brightness > 128 ? -15 : 20;
+        return new Color(
+            Math.max(0, Math.min(255, r + offset)),
+            Math.max(0, Math.min(255, g + offset)),
+            Math.max(0, Math.min(255, b + offset))
+        );
+    }
+
+    private Color calculatePressedColor(Color bg) {
+        int r = bg.getRed();
+        int g = bg.getGreen();
+        int b = bg.getBlue();
+        int brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        int offset = brightness > 128 ? -15 : 20;
+        return new Color(
+            Math.max(0, Math.min(255, r + 2 * offset)),
+            Math.max(0, Math.min(255, g + 2 * offset)),
+            Math.max(0, Math.min(255, b + 2 * offset))
+        );
     }
 
     public void setHoverColor(Color hoverColor) {
         this.hoverColor = hoverColor;
+        this.isCustomHover = (hoverColor != null);
     }
 
     public void setPressedColor(Color pressedColor) {
         this.pressedColor = pressedColor;
+        this.isCustomPressed = (pressedColor != null);
     }
 
     public void setCornerRadius(int radius) {
         this.cornerRadius = radius;
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        if (!isCustomHover) {
+            Color bg = getBackground();
+            if (bg != null) {
+                this.hoverColor = calculateHoverColor(bg);
+            }
+        }
+        if (!isCustomPressed) {
+            Color bg = getBackground();
+            if (bg != null) {
+                this.pressedColor = calculatePressedColor(bg);
+            }
+        }
     }
 
     @Override
@@ -90,7 +124,7 @@ public class RoundedButton extends JButton {
         }
 
         if (!isEnabled()) {
-            g2.setColor(new Color(0xE5, 0xE7, 0xEB));
+            g2.setColor(ThemeManager.isDark() ? new Color(0x2A, 0x2D, 0x3A) : new Color(0xE5, 0xE7, 0xEB));
         } else if (getModel().isPressed()) {
             g2.setColor(pressedColor != null ? pressedColor : bg.darker());
         } else if (getModel().isRollover()) {

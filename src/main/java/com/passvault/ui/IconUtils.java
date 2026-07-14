@@ -26,4 +26,20 @@ public class IconUtils {
         }
         return icon;
     }
+
+    /**
+     * Get a list of logo images of various sizes for window decoration.
+     */
+    public static java.util.List<java.awt.Image> getLogoImages() {
+        java.util.List<java.awt.Image> images = new java.util.ArrayList<>();
+        int[] sizes = {16, 32, 48, 64, 128, 256};
+        for (int size : sizes) {
+            FlatSVGIcon icon = getIcon("logo", size);
+            if (icon != null) {
+                icon.setColorFilter(new FlatSVGIcon.ColorFilter(c -> new Color(0x3B, 0x82, 0xF6))); // Theme accent blue
+                images.add(icon.getImage());
+            }
+        }
+        return images;
+    }
 }

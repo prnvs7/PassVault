@@ -196,4 +196,22 @@ public class AuthService {
             return null;
         }
     }
+
+    public String getThemePreference() {
+        try {
+            Map<String, String> config = storageManager.loadMasterPasswordConfig();
+            return config != null ? config.getOrDefault("theme", "light") : "light";
+        } catch (Exception e) {
+            return "light";
+        }
+    }
+
+    public void setThemePreference(String theme) {
+        try {
+            storageManager.saveConfigValue("theme", theme);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
+

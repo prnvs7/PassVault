@@ -58,6 +58,18 @@ public class StorageManager {
         saveMasterPassword(salt, hashedPassword, null, null, null, null);
     }
 
+    public void saveConfigValue(String key, String value) throws Exception {
+        Map<String, String> config = loadMasterPasswordConfig();
+        if (config == null) {
+            config = new java.util.HashMap<>();
+            config.put("createdAt", String.valueOf(System.currentTimeMillis()));
+        }
+        config.put(key, value);
+        String json = gson.toJson(config);
+        Files.write(Paths.get(CONFIG_FILE), json.getBytes());
+    }
+
+
     public Map<String, String> loadMasterPasswordConfig() throws Exception {
         Path configPath = Paths.get(CONFIG_FILE);
         if (!Files.exists(configPath)) {
